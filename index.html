@@ -34,15 +34,15 @@
             justify-content: center;
             width: 100%;
             height: 100%;
-            padding: 4vh 0;
+            padding: 2vh 0; /* 余白を調整 */
         }
 
-        /* タイマー数字：より洗練された字形とバランスに調整 */
+        /* タイマー数字：極限まで大きく調整 */
         #timer {
-            font-size: 32vw; 
+            font-size: 38vw; /* サイズをさらに拡大 */
             font-weight: 700;
-            line-height: 0.85;
-            letter-spacing: -0.03em;
+            line-height: 0.8; /* 行間をさらに詰める */
+            letter-spacing: -0.04em; /* 文字間隔をさらに詰める */
             text-align: center;
             font-variant-numeric: tabular-nums; /* 数字の幅を固定してガタつきを防止 */
         }
@@ -52,7 +52,7 @@
             font-size: 3.2vw;
             font-weight: 700;
             letter-spacing: 0.02em;
-            margin-top: 5vh;
+            margin-top: 3vh; /* 余白を調整 */
             text-transform: uppercase;
         }
 
@@ -97,6 +97,7 @@
     <div class="controls">
         <button class="btn" id="start-stop-btn" onclick="toggleTimer()">START</button>
         <button class="btn" onclick="resetTimer()">RESET</button>
+        <button class="btn" onclick="toggleFullscreen()">FULLSCREEN</button>
     </div>
 
     <div class="container">
@@ -105,7 +106,7 @@
         <div id="logo">Creation Campfire 2026</div>
     </div>
 
-    <div id="guide">SPACE: Start/Stop | R: Reset | F11: Fullscreen</div>
+    <div id="guide">SPACE: Start/Stop | R: Reset | F: Fullscreen</div>
 
     <script>
         const DEFAULT_TIME = 300; // 5分 = 300秒
@@ -153,13 +154,26 @@
             startStopBtn.textContent = 'START';
         }
 
-        // キーボードショートカット（手元での操作用）
+        // フルスクリーン切り替え
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // キーボードショートカット
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
                 toggleTimer();
             } else if (e.code === 'KeyR') {
                 resetTimer();
+            } else if (e.code === 'KeyF') {
+                toggleFullscreen();
             }
         });
     </script>
