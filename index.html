@@ -16,7 +16,8 @@
             height: 100%;
             background-color: #ffffff;
             color: #000000;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            /* 寺田倉庫ICTサイトに合わせたモダンなフォント指定 */
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -25,54 +26,86 @@
             user-select: none;
         }
 
-        /* タイマー数字：画面幅いっぱいに極限まで大きく */
-        #timer {
-            font-size: 35vw; 
-            font-weight: 700;
-            line-height: 0.9;
-            letter-spacing: -0.02em;
-            text-align: center;
-            cursor: pointer; /* 数字をクリックしてスタート/ストップ */
+        /* タイマーコンテナ */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 4vh 0;
         }
 
-        /* 下部のイベント名ロゴ */
+        /* タイマー数字：より洗練された字形とバランスに調整 */
+        #timer {
+            font-size: 32vw; 
+            font-weight: 700;
+            line-height: 0.85;
+            letter-spacing: -0.03em;
+            text-align: center;
+            font-variant-numeric: tabular-nums; /* 数字の幅を固定してガタつきを防止 */
+        }
+
+        /* 下部のイベント名ロゴ（フォントとトラッキングをサイトに最適化） */
         #logo {
-            font-size: 3.5vw;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-            margin-top: 2vh;
+            font-size: 3.2vw;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            margin-top: 5vh;
             text-transform: uppercase;
         }
 
-        /* 操作用の非表示エリア（画面の左側クリックでリセット） */
-        #reset-zone {
+        /* コントロールボタン：目立たない超シンプルデザイン */
+        .controls {
             position: absolute;
-            left: 0;
-            top: 0;
-            width: 15%;
-            height: 100%;
-            cursor: pointer;
-            z-index: 10;
+            top: 3vh;
+            right: 3vh;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
         }
 
-        /* フルスクリーン案内（初回のみ薄く表示） */
+        .btn {
+            background: none;
+            border: none;
+            color: #999999; /* 目立たない薄いグレー */
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 12px;
+            letter-spacing: 0.05em;
+            transition: color 0.2s ease;
+        }
+
+        .btn:hover {
+            color: #000000; /* ホバー時のみ黒くなる */
+        }
+
+        /* フルスクリーン案内（薄く表示） */
         #guide {
             position: absolute;
             bottom: 2vh;
-            font-size: 12px;
-            color: #ccc;
+            font-size: 11px;
+            color: #dddddd;
+            letter-spacing: 0.05em;
         }
     </style>
 </head>
 <body>
 
-    <div id="reset-zone" title="クリックで5分にリセット"></div>
+    <div class="controls">
+        <button class="btn" id="start-stop-btn" onclick="toggleTimer()">START</button>
+        <button class="btn" onclick="resetTimer()">RESET</button>
+    </div>
 
-    <div id="timer" onclick="toggleTimer()">05:00</div>
+    <div class="container">
+        <div id="timer">05:00</div>
 
-    <div id="logo">Creation Campfire 2026</div>
+        <div id="logo">Creation Campfire 2026</div>
+    </div>
 
-    <div id="guide">※画面クリックでStart/Stop | 左端クリックでReset | F11キーで全画面</div>
+    <div id="guide">SPACE: Start/Stop | R: Reset | F11: Fullscreen</div>
 
     <script>
         const DEFAULT_TIME = 300; // 5分 = 300秒
@@ -80,8 +113,9 @@
         let timerId = null;
 
         const timerDisplay = document.getElementById('timer');
+        const startStopBtn = document.getElementById('start-stop-btn');
 
-        // 時間の表示を更新する関数
+        // 表示更新
         function updateDisplay() {
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
@@ -89,45 +123,43 @@
                 `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
-        // スタートとストップの切り替え
+        // スタート / ストップ
         function toggleTimer() {
             if (timerId === null) {
-                // スタート
-                if (timeLeft === 0) return; // 0秒の時は動かさない
+                if (timeLeft === 0) return;
                 timerId = setInterval(() => {
                     timeLeft--;
                     updateDisplay();
                     if (timeLeft <= 0) {
                         clearInterval(timerId);
                         timerId = null;
+                        startStopBtn.textContent = 'START';
                     }
                 }, 1000);
+                startStopBtn.textContent = 'STOP';
             } else {
-                // ストップ
                 clearInterval(timerId);
                 timerId = null;
+                startStopBtn.textContent = 'START';
             }
         }
 
-        // 左端クリックでのリセット処理
-        document.getElementById('reset-zone').addEventListener('click', (e) => {
-            e.stopPropagation(); // タイマーのクリックイベントを発火させない
+        // リセット
+        function resetTimer() {
             clearInterval(timerId);
             timerId = null;
             timeLeft = DEFAULT_TIME;
             updateDisplay();
-        });
+            startStopBtn.textContent = 'START';
+        }
 
-        // キーボードのスペースキーでもスタート/ストップ、Rキーでリセット可能に
+        // キーボードショートカット（手元での操作用）
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
                 toggleTimer();
             } else if (e.code === 'KeyR') {
-                clearInterval(timerId);
-                timerId = null;
-                timeLeft = DEFAULT_TIME;
-                updateDisplay();
+                resetTimer();
             }
         });
     </script>
