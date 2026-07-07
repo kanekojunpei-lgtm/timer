@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creation Campfire 2026 Timer</title>
+    <style>
+        /* 全体のリセットと背景・文字色設定 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        /* タイマー数字：画面幅いっぱいに極限まで大きく */
+        #timer {
+            font-size: 35vw; 
+            font-weight: 700;
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+            text-align: center;
+            cursor: pointer; /* 数字をクリックしてスタート/ストップ */
+        }
+
+        /* 下部のイベント名ロゴ */
+        #logo {
+            font-size: 3.5vw;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            margin-top: 2vh;
+            text-transform: uppercase;
+        }
+
+        /* 操作用の非表示エリア（画面の左側クリックでリセット） */
+        #reset-zone {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 15%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* フルスクリーン案内（初回のみ薄く表示） */
+        #guide {
+            position: absolute;
+            bottom: 2vh;
+            font-size: 12px;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="reset-zone" title="クリックで5分にリセット"></div>
+
+    <div id="timer" onclick="toggleTimer()">05:00</div>
+
+    <div id="logo">Creation Campfire 2026</div>
+
+    <div id="guide">※画面クリックでStart/Stop | 左端クリックでReset | F11キーで全画面</div>
+
+    <script>
+        const DEFAULT_TIME = 300; // 5分 = 300秒
+        let timeLeft = DEFAULT_TIME;
+        let timerId = null;
+
+        const timerDisplay = document.getElementById('timer');
+
+        // 時間の表示を更新する関数
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // スタートとストップの切り替え
+        function toggleTimer() {
+            if (timerId === null) {
+                // スタート
+                if (timeLeft === 0) return; // 0秒の時は動かさない
+                timerId = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerId);
+                        timerId = null;
+                    }
+                }, 1000);
+            } else {
+                // ストップ
+                clearInterval(timerId);
+                timerId = null;
+            }
+        }
+
+        // 左端クリックでのリセット処理
+        document.getElementById('reset-zone').addEventListener('click', (e) => {
+            e.stopPropagation(); // タイマーのクリックイベントを発火させない
+            clearInterval(timerId);
+            timerId = null;
+            timeLeft = DEFAULT_TIME;
+            updateDisplay();
+        });
+
+        // キーボードのスペースキーでもスタート/ストップ、Rキーでリセット可能に
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleTimer();
+            } else if (e.code === 'KeyR') {
+                clearInterval(timerId);
+                timerId = null;
+                timeLeft = DEFAULT_TIME;
+                updateDisplay();
+            }
+        });
+    </script>
+</body>
+</html>
