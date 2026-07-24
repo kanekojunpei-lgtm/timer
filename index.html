@@ -52,15 +52,15 @@
             font-size: 3.2vw;
             font-weight: 700;
             letter-spacing: 0.02em;
-            margin-top: 3vh; /* 余白を調整 */
+            margin-top: 10vh; /* 位置を下に下げました */
             text-transform: uppercase;
         }
 
-        /* コントロールボタン：目立たない超シンプルデザイン */
+        /* コントロールボタン：左上に配置 */
         .controls {
             position: absolute;
             top: 3vh;
-            right: 3vh;
+            left: 3vh; /* 右から左上に変更 */
             display: flex;
             gap: 12px;
             z-index: 100;
@@ -81,6 +81,12 @@
         .btn:hover {
             color: #000000; /* ホバー時のみ黒くなる */
         }
+        
+        .btn.active-time {
+            color: #000000;
+            font-weight: 700;
+            border-bottom: 2px solid #000000;
+        }
 
         /* フルスクリーン案内（薄く表示） */
         #guide {
@@ -90,11 +96,35 @@
             color: #dddddd;
             letter-spacing: 0.05em;
         }
+
+        /* 終了時の全画面画面 */
+        #end-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000; /* 全画面を黒にする */
+            display: none; /* 初期状態は非表示 */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* 最前面に表示 */
+        }
+
+        .end-text {
+            font-size: 35vw; /* タイマーと同等の大きさ */
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            color: #ffffff; /* 文字を白にする */
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
     <div class="controls">
+        <button class="btn active-time" id="btn-5min" onclick="setTime(300)">5 MIN</button>
+        <button class="btn" id="btn-3min" onclick="setTime(180)">3 MIN</button>
         <button class="btn" id="start-stop-btn" onclick="toggleTimer()">START</button>
         <button class="btn" onclick="resetTimer()">RESET</button>
         <button class="btn" onclick="toggleFullscreen()">FULLSCREEN</button>
@@ -108,13 +138,38 @@
 
     <div id="guide">SPACE: Start/Stop | R: Reset | F: Fullscreen</div>
 
+    <!-- 終了時の全画面画面 -->
+    <div id="end-screen">
+        <div class="end-text">終了</div>
+    </div>
+
     <script>
-        const DEFAULT_TIME = 300; // 5分 = 300秒
-        let timeLeft = DEFAULT_TIME;
+        let currentDefaultTime = 300; // 初期設定を5分(300秒)にする
+        let timeLeft = currentDefaultTime;
         let timerId = null;
 
         const timerDisplay = document.getElementById('timer');
         const startStopBtn = document.getElementById('start-stop-btn');
+        const logoDisplay = document.getElementById('logo'); 
+        const endScreen = document.getElementById('end-screen');
+        const btn5min = document.getElementById('btn-5min');
+        const btn3min = document.getElementById('btn-3min');
+
+        // 時間の切り替え設定
+        function setTime(seconds) {
+            currentDefaultTime = seconds;
+            
+            // ボタンの見た目（アクティブ状態）を切り替え
+            if (seconds === 300) {
+                btn5min.classList.add('active-time');
+                btn3min.classList.remove('active-time');
+            } else {
+                btn3min.classList.add('active-time');
+                btn5min.classList.remove('active-time');
+            }
+            
+            resetTimer(); // 選択した時間でタイマーをリセット
+        }
 
         // 表示更新
         function updateDisplay() {
@@ -122,6 +177,15 @@
             const seconds = timeLeft % 60;
             timerDisplay.textContent = 
                 `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            // 残り時間に応じたテキスト切り替え
+            if (timeLeft <= 60 && timeLeft > 30) {
+                logoDisplay.textContent = '残り1分';
+            } else if (timeLeft <= 30 && timeLeft > 0) {
+                logoDisplay.textContent = '残り30秒';
+            } else {
+                logoDisplay.textContent = 'Peer Learning';
+            }
         }
 
         // スタート / ストップ
@@ -135,6 +199,8 @@
                         clearInterval(timerId);
                         timerId = null;
                         startStopBtn.textContent = 'START';
+                        // 終了時の全画面画面を表示
+                        endScreen.style.display = 'flex';
                     }
                 }, 1000);
                 startStopBtn.textContent = 'STOP';
@@ -149,9 +215,11 @@
         function resetTimer() {
             clearInterval(timerId);
             timerId = null;
-            timeLeft = DEFAULT_TIME;
+            timeLeft = currentDefaultTime; // 現在設定されている時間にリセット
             updateDisplay();
             startStopBtn.textContent = 'START';
+            // 終了時の全画面画面を非表示にする
+            endScreen.style.display = 'none';
         }
 
         // フルスクリーン切り替え
@@ -168,8 +236,14 @@
         // キーボードショートカット
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
-                e.preventDefault();
-                toggleTimer();
+                e.preventDefault(); // スクロール等のデフォルト動作を防止
+                
+                // 終了画面が出ている状態でSpaceを押した場合は、リセットする
+                if (endScreen.style.display === 'flex') {
+                    resetTimer();
+                } else {
+                    toggleTimer();
+                }
             } else if (e.code === 'KeyR') {
                 resetTimer();
             } else if (e.code === 'KeyF') {
