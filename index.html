@@ -51,17 +51,18 @@
             font-size: 3.2vw;
             font-weight: 700;
             letter-spacing: 0.02em;
-            margin-top: 10vh;
+            margin-top: 15vh; /* 10vhから15vhに変更し、さらに下に下げました */
             text-transform: uppercase;
-            /* 画像とテキストが切り替わっても高さがブレないように固定 */
-            height: 5vw; 
+            /* 画像とテキストが切り替わっても高さがブレないように固定
+               以前の5vwから4倍の 20vw に変更 */
+            height: 20vw; 
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         #logo img {
-            height: 100%; /* 親要素(5vw)に合わせる */
+            height: 100%; /* 親要素(20vw)に合わせることで元の4倍の大きさになります */
             max-width: 100%;
             object-fit: contain;
         }
