@@ -16,7 +16,6 @@
             height: 100%;
             background-color: #ffffff;
             color: #000000;
-            /* 寺田倉庫ICTサイトに合わせたモダンなフォント指定 */
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             overflow: hidden;
             display: flex;
@@ -34,33 +33,44 @@
             justify-content: center;
             width: 100%;
             height: 100%;
-            padding: 2vh 0; /* 余白を調整 */
+            padding: 2vh 0;
         }
 
-        /* タイマー数字：極限まで大きく調整 */
+        /* タイマー数字・終了文字：極限まで大きく調整 */
         #timer {
-            font-size: 38vw; /* サイズをさらに拡大 */
+            font-size: 38vw; 
             font-weight: 700;
-            line-height: 0.8; /* 行間をさらに詰める */
-            letter-spacing: -0.04em; /* 文字間隔をさらに詰める */
+            line-height: 0.8;
+            letter-spacing: -0.04em;
             text-align: center;
-            font-variant-numeric: tabular-nums; /* 数字の幅を固定してガタつきを防止 */
+            font-variant-numeric: tabular-nums;
         }
 
-        /* 下部のイベント名ロゴ（フォントとトラッキングをサイトに最適化） */
+        /* 下部のイベント名ロゴ領域 */
         #logo {
             font-size: 3.2vw;
             font-weight: 700;
             letter-spacing: 0.02em;
-            margin-top: 10vh; /* 位置を下に下げました */
+            margin-top: 10vh;
             text-transform: uppercase;
+            /* 画像とテキストが切り替わっても高さがブレないように固定 */
+            height: 5vw; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #logo img {
+            height: 100%; /* 親要素(5vw)に合わせる */
+            max-width: 100%;
+            object-fit: contain;
         }
 
         /* コントロールボタン：左上に配置 */
         .controls {
             position: absolute;
             top: 3vh;
-            left: 3vh; /* 右から左上に変更 */
+            left: 3vh;
             display: flex;
             gap: 12px;
             z-index: 100;
@@ -69,7 +79,7 @@
         .btn {
             background: none;
             border: none;
-            color: #999999; /* 目立たない薄いグレー */
+            color: #999999;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
@@ -79,7 +89,7 @@
         }
 
         .btn:hover {
-            color: #000000; /* ホバー時のみ黒くなる */
+            color: #000000;
         }
         
         .btn.active-time {
@@ -96,28 +106,6 @@
             color: #dddddd;
             letter-spacing: 0.05em;
         }
-
-        /* 終了時の全画面画面 */
-        #end-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #000000; /* 全画面を黒にする */
-            display: none; /* 初期状態は非表示 */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000; /* 最前面に表示 */
-        }
-
-        .end-text {
-            font-size: 35vw; /* タイマーと同等の大きさ */
-            font-weight: 700;
-            letter-spacing: -0.04em;
-            color: #ffffff; /* 文字を白にする */
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -131,17 +119,15 @@
     </div>
 
     <div class="container">
+        <!-- 初期表示 -->
         <div id="timer">05:00</div>
-
-        <div id="logo">Peer Learning </div>
+        <!-- ロゴエリア -->
+        <div id="logo">
+            <img src="image.jpg" alt="Peer Learning">
+        </div>
     </div>
 
     <div id="guide">SPACE: Start/Stop | R: Reset | F: Fullscreen</div>
-
-    <!-- 終了時の全画面画面 -->
-    <div id="end-screen">
-        <div class="end-text">終了</div>
-    </div>
 
     <script>
         let currentDefaultTime = 300; // 初期設定を5分(300秒)にする
@@ -151,9 +137,11 @@
         const timerDisplay = document.getElementById('timer');
         const startStopBtn = document.getElementById('start-stop-btn');
         const logoDisplay = document.getElementById('logo'); 
-        const endScreen = document.getElementById('end-screen');
         const btn5min = document.getElementById('btn-5min');
         const btn3min = document.getElementById('btn-3min');
+
+        // 画像のHTMLタグ
+        const logoImgHTML = '<img src="image.jpg" alt="Peer Learning">';
 
         // 時間の切り替え設定
         function setTime(seconds) {
@@ -168,23 +156,30 @@
                 btn5min.classList.remove('active-time');
             }
             
-            resetTimer(); // 選択した時間でタイマーをリセット
+            resetTimer();
         }
 
         // 表示更新
         function updateDisplay() {
+            if (timeLeft <= 0) {
+                // 終了時の表示（数字があった場所にそのまま表示）
+                timerDisplay.textContent = '終了';
+                logoDisplay.innerHTML = logoImgHTML;
+                return;
+            }
+
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             timerDisplay.textContent = 
                 `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-            // 残り時間に応じたテキスト切り替え
-            if (timeLeft <= 60 && timeLeft > 30) {
+            // 残り時間に応じたテキスト切り替え（それぞれ10秒間のみ表示）
+            if (timeLeft <= 60 && timeLeft > 50) {
                 logoDisplay.textContent = '残り1分';
-            } else if (timeLeft <= 30 && timeLeft > 0) {
+            } else if (timeLeft <= 30 && timeLeft > 20) {
                 logoDisplay.textContent = '残り30秒';
             } else {
-                logoDisplay.textContent = 'Peer Learning';
+                logoDisplay.innerHTML = logoImgHTML;
             }
         }
 
@@ -199,8 +194,6 @@
                         clearInterval(timerId);
                         timerId = null;
                         startStopBtn.textContent = 'START';
-                        // 終了時の全画面画面を表示
-                        endScreen.style.display = 'flex';
                     }
                 }, 1000);
                 startStopBtn.textContent = 'STOP';
@@ -215,11 +208,9 @@
         function resetTimer() {
             clearInterval(timerId);
             timerId = null;
-            timeLeft = currentDefaultTime; // 現在設定されている時間にリセット
+            timeLeft = currentDefaultTime; 
             updateDisplay();
             startStopBtn.textContent = 'START';
-            // 終了時の全画面画面を非表示にする
-            endScreen.style.display = 'none';
         }
 
         // フルスクリーン切り替え
@@ -236,10 +227,10 @@
         // キーボードショートカット
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
-                e.preventDefault(); // スクロール等のデフォルト動作を防止
+                e.preventDefault();
                 
-                // 終了画面が出ている状態でSpaceを押した場合は、リセットする
-                if (endScreen.style.display === 'flex') {
+                // 終了状態でSpaceを押した場合はリセットする
+                if (timeLeft <= 0) {
                     resetTimer();
                 } else {
                     toggleTimer();
