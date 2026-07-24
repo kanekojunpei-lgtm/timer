@@ -33,36 +33,37 @@
             justify-content: center;
             width: 100%;
             height: 100%;
-            padding: 2vh 0;
+            padding: 2vh 5vw; /* 左右にも余裕を持たせる */
         }
 
-        /* タイマー数字・終了文字：極限まで大きく調整 */
+        /* タイマー数字・終了文字：絶対に崩れないよう画面に追従 */
         #timer {
-            font-size: 38vw; 
+            /* 横幅(vw)と縦幅(vh)を比較し、はみ出さない最大のサイズを自動計算 */
+            font-size: min(35vw, 45vh); 
             font-weight: 700;
-            line-height: 0.8;
+            line-height: 1; /* 行間を標準に戻し、上下の見切れを防止 */
             letter-spacing: -0.04em;
             text-align: center;
             font-variant-numeric: tabular-nums;
+            white-space: nowrap; /* 画面が狭くても絶対に改行させない */
         }
 
         /* 下部のイベント名ロゴ領域 */
         #logo {
-            font-size: 3.2vw;
+            font-size: min(4vw, 5vh); /* 文字表示時も崩れないように自動計算 */
             font-weight: 700;
             letter-spacing: 0.02em;
-            margin-top: 15vh; /* 10vhから15vhに変更し、さらに下に下げました */
+            margin-top: 6vh; /* タイマーを邪魔しない適度な余白 */
             text-transform: uppercase;
-            /* 画像とテキストが切り替わっても高さがブレないように固定
-               以前の5vwから4倍の 20vw に変更 */
-            height: 20vw; 
+            /* 画像の高さも、横幅と縦幅のバランスを見てタイマーを圧迫しないよう制限 */
+            height: min(15vw, 20vh); 
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         #logo img {
-            height: 100%; /* 親要素(20vw)に合わせることで元の4倍の大きさになります */
+            height: 100%; 
             max-width: 100%;
             object-fit: contain;
         }
