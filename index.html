@@ -19,47 +19,52 @@
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             overflow: hidden;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             user-select: none;
         }
 
-        /* タイマーコンテナ */
+        /* タイマーコンテナ：画面全体を使って完全中央に配置 */
         .container {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* タイマー数字・終了文字：バランスの良い大きさに微調整 */
+        #timer {
+            font-size: min(40vw, 52vh); /* 大きすぎず見やすいサイズに調整 */
+            font-weight: 700;
+            line-height: 1; 
+            letter-spacing: -0.04em;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap; 
+            display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             height: 100%;
-            padding: 2vh 5vw; /* 左右にも余裕を持たせる */
-        }
-
-        /* タイマー数字・終了文字：絶対に崩れないよう画面に追従 */
-        #timer {
-            /* 横幅(vw)と縦幅(vh)を比較し、はみ出さない最大のサイズを自動計算 */
-            font-size: min(35vw, 45vh); 
-            font-weight: 700;
-            line-height: 1; /* 行間を標準に戻し、上下の見切れを防止 */
-            letter-spacing: -0.04em;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-            white-space: nowrap; /* 画面が狭くても絶対に改行させない */
         }
 
         /* 下部のイベント名ロゴ領域 */
         #logo {
-            font-size: min(4vw, 5vh); /* 文字表示時も崩れないように自動計算 */
-            font-weight: 700;
-            letter-spacing: 0.02em;
-            margin-top: 6vh; /* タイマーを邪魔しない適度な余白 */
-            text-transform: uppercase;
-            /* 画像の高さも、横幅と縦幅のバランスを見てタイマーを圧迫しないよう制限 */
-            height: min(15vw, 20vh); 
+            position: absolute;
+            bottom: 8vh;
+            left: 0;
+            width: 100%;
+            height: min(15vw, 18vh); 
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: min(4vw, 5vh); 
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            z-index: 10;
         }
 
         #logo img {
@@ -104,9 +109,13 @@
         #guide {
             position: absolute;
             bottom: 2vh;
+            left: 0;
+            width: 100%;
+            text-align: center;
             font-size: 11px;
             color: #dddddd;
             letter-spacing: 0.05em;
+            z-index: 10;
         }
     </style>
 </head>
@@ -123,10 +132,11 @@
     <div class="container">
         <!-- 初期表示 -->
         <div id="timer">05:00</div>
-        <!-- ロゴエリア -->
-        <div id="logo">
-            <img src="image.jpg" alt="Peer Learning">
-        </div>
+    </div>
+    
+    <!-- ロゴエリア -->
+    <div id="logo">
+        <img src="image.jpg" alt="Peer Learning">
     </div>
 
     <div id="guide">SPACE: Start/Stop | R: Reset | F: Fullscreen</div>
@@ -164,10 +174,14 @@
         // 表示更新
         function updateDisplay() {
             if (timeLeft <= 0) {
-                // 終了時の表示（数字があった場所にそのまま表示）
+                // 終了時の表示（数字と同じ中心座標に完全固定）
                 timerDisplay.textContent = '終了';
+                timerDisplay.style.letterSpacing = '0em';
                 logoDisplay.innerHTML = logoImgHTML;
                 return;
+            } else {
+                // 数字表示用の詰めた字間に設定
+                timerDisplay.style.letterSpacing = '-0.04em';
             }
 
             const minutes = Math.floor(timeLeft / 60);
